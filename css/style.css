@@ -1,0 +1,506 @@
+/* ===================== RESET ===================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #fafafa;
+  color: #222;
+  line-height: 1.6;
+}
+
+/* ===================== HEADER ===================== */
+.site-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: #1e3a8a;
+  padding: 22px 0;
+}
+
+/* ===================== NAVBAR ===================== */
+nav {
+  display:flex;
+  justify-content:center;
+  gap:25px;
+  background-color:#BEF4FA;
+  padding:15px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+nav a {
+  text-decoration:none;
+  color:#1e3a8a;
+  font-weight:bold;
+  font-size:21px;
+  position:relative;
+}
+
+nav a::after {
+  content:'';
+  position:absolute;
+  width:0%;
+  height:2px;
+  background:#f97316;
+  bottom:-4px;
+  left:0;
+  transition:0.3s;
+}
+
+nav a:hover::after { 
+  width:100%; 
+}
+
+nav a.active { 
+  color:#f97316; 
+}
+/* ===================== HERO SECTION ===================== */
+.home-hero {
+  position: relative;
+  text-align: center;
+  padding: 110px 20px;
+  background-size: cover;
+  background-position: center;
+  color: #ffffff;
+}
+
+.home-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(30, 58, 138, 0.55);
+}
+
+.home-hero h1,
+.home-hero p,
+.home-hero .buttons {
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.home-hero p {
+  max-width: 900px;
+  margin: auto;
+  font-size: 18px;
+}
+
+.home-hero .buttons {
+  margin-top: 35px;
+}
+
+.home-hero .buttons a {
+  display: inline-block;
+  margin: 0 10px;
+  padding: 14px 36px;
+  border-radius: 10px;
+  background: #f97316;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.home-hero .buttons a:hover {
+  background: #1e3a8a;
+  transform: translateY(-4px);
+}
+
+/* ===================== CONTAINER ===================== */
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 70px auto;
+}
+
+/* ===================== CARDS ===================== */
+.graph-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: center;
+}
+
+.graph-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  flex: 1 1 300px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.graph-card:hover {
+  transform: translateY(-8px);
+}
+
+.graph-card h3 {
+  color: #1e3a8a;
+  margin-bottom: 10px;
+}
+
+/* ===================== MODULE BUTTONS ===================== */
+.modules {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 35px;
+}
+
+.modules button {
+  padding: 12px 26px;
+  border: none;
+  border-radius: 8px;
+  background: #1e3a8a;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.modules button:hover,
+.modules button.active {
+  background: #f97316;
+  transform: translateY(-2px);
+}
+
+/* ===================== GRAPHS ===================== */
+.graphs {
+  max-width: 1100px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  padding-bottom: 60px;
+}
+
+.graph-box {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.graph-box h3 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.graph-box.full {
+  grid-column: span 2;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ===================== SECTIONS ===================== */
+.section {
+  max-width: 1100px;
+  margin: 70px auto;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+  color: #1e3a8a;
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 25px;
+}
+
+/* ===================== ABOUT ===================== */
+.about-members {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.about-member {
+  text-align: center;
+  width: 220px;
+}
+
+.about-member img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #1e3a8a;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.about-member img:hover {
+  transform: scale(1.05);
+}
+
+.about-member h3 {
+  color: #1e3a8a;
+}
+
+.about-member p {
+  font-size: 15px;
+  color: #555;
+}
+
+/* ===================== CONTACT ===================== */
+.contact-card {
+  max-width: 550px;
+  margin: auto;
+}
+
+.contact-card input,
+.contact-card textarea {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.contact-card button {
+  background: #1e3a8a;
+  color: #ffffff;
+  padding: 14px 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.contact-card button:hover {
+  background: #f97316;
+  transform: translateY(-3px);
+}
+
+/* ===================== ANALYSIS & PREDICT SAME LOOK ===================== */
+.analysis-card, 
+.PredictionResult {
+  max-width: 1000px;
+  margin: 60px auto;
+  padding: 60px 40px;
+  background: #f9f9f9;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.analysis-card h2,
+.PredictictionResult h2 {
+  color: #1e3a8a;
+  font-size: 38px;
+  margin-bottom: 25px;
+}
+
+/* ===================== PREDICTION RESULT ===================== */
+#predictionResult {
+  margin-top: 25px;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.6;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  display: none;
+}
+
+/* ===================== SCROLL TO TOP ===================== */
+#scrollTopBtn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: #1e3a8a;
+  color: #fff;
+  border: none;
+  padding: 14px 18px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  display: none;
+  z-index: 1000;
+  transition: 0.3s;
+}
+
+#scrollTopBtn:hover {
+  background: #f97316;
+}
+
+/* ===================== FOOTER ===================== */
+footer {
+  text-align: center;
+  padding: 35px 0;
+  color: #777;
+  font-size: 14px;
+  border-top: 1px solid #eee;
+  margin-top: 60px;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 768px) {
+
+  /* NAV */
+  nav {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  nav a {
+    font-size: 18px;
+  }
+
+  /* HERO */
+  .home-hero {
+    padding: 80px 20px;
+  }
+
+  .home-hero h1 {
+    font-size: 34px;
+  }
+
+  .home-hero p {
+    font-size: 16px;
+  }
+
+  .home-hero .buttons a {
+    padding: 12px 24px;
+  }
+
+  /* TITLE */
+  .site-title {
+    font-size: 26px;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin: 25px auto;
+    padding: 25px;
+  }
+
+  .section h2 {
+    font-size: 26px;
+  }
+
+  .section p {
+    font-size: 15px;
+  }
+
+  /* GRAPHS */
+  .graphs {
+    grid-template-columns: 1fr;
+  }
+
+  .graph-box.full {
+    grid-column: span 1;
+  }
+
+  /* ABOUT */
+  .about-members {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .about-member img {
+    width: 150px;
+    height: 150px;
+  }
+
+  /* MODULE BUTTONS */
+  .modules {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .modules button {
+    width: 80%;
+  }
+
+  /* MAP */
+  #map {
+    height: 300px;
+  }
+
+  /* GPS & DATA */
+  .gps-details,
+  .data-display {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ANALYSIS / PREDICT */
+  .analysis-card,
+  .PredictionResult {
+    padding: 40px 20px;
+  }
+
+}
+/* ===================== PROFESSIONAL UI ENHANCEMENTS ===================== */
+
+/* Smooth hover for graph cards */
+.graph-card:hover {
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+/* Smooth hover for about-member images */
+.about-member img:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* Smooth hover for module buttons */
+.modules button:hover,
+.modules button.active {
+  transform: translateY(-3px);
+}
+
+/* Smooth hover for scroll to top button */
+#scrollTopBtn:hover {
+  transform: scale(1.05);
+}
+
+/* Optional subtle card hover for analysis/predict sections */
+.analysis-card:hover,
+.PredictionResult:hover {
+  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+  transition: 0.3s;
+}
+@media (max-width: 768px) {
+
+  /* Adjust hero buttons spacing for tiny screens */
+  .home-hero .buttons a {
+    margin: 8px 0;
+    display: block;
+  }
+
+  /* Slightly smaller graph cards */
+  .graph-card {
+    padding: 20px;
+  }
+
+  /* Slightly smaller analysis/predict cards */
+  .analysis-card,
+  .PredictionResult {
+    padding: 30px 15px;
+  }
+
+}

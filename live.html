@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prometheus | Live Cam</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* Extra styles for the live cam page */
+.live-container {
+  max-width: 1000px;
+  margin: 60px auto;
+  padding: 40px 30px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 24px;
+  box-shadow: 0 15px 40px rgba(30, 58, 138, 0.12);
+  text-align: center;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+.live-container h2 {
+  color: #1e3a8a;
+  font-size: 38px;
+  margin-bottom: 20px;
+}
+
+.placeholder-icon {
+  font-size: 100px;
+  color: #f97316;
+  margin: 30px 0 20px;
+}
+
+.construction-message {
+  background: #fff3e0;
+  border-left: 6px solid #f97316;
+  padding: 25px;
+  border-radius: 16px;
+  max-width: 550px;
+  margin: 30px auto;
+  text-align: left;
+}
+
+.construction-message h3 {
+  color: #1e3a8a;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.construction-message p {
+  color: #444;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.camera-preview {
+  background: #eef2ff;
+  border-radius: 20px;
+  padding: 40px;
+  margin: 30px 0;
+  border: 2px dashed #1e3a8a;
+}
+
+.camera-preview i {
+  font-size: 70px;
+  color: #1e3a8a;
+  opacity: 0.6;
+}
+
+.camera-preview p {
+  margin-top: 15px;
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #1e3a8a;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.back-link:hover {
+  background: #f97316;
+  transform: translateY(-3px);
+}
+</style>
+<!-- Font Awesome for icons (if not already in your site) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="site-title">Prometheus</div>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="analysis.html">Data Analysis</a>
+  <a href="predict.html">Prediction</a>
+  <a href="live.html" style="color:#f97316;">Live Cam</a>
+  <a href="about.html">About Us</a>
+</nav>
+
+<!-- Live Cam Content -->
+<div class="live-container">
+  <h2><i class="fas fa-video"></i> Live Camera Feed</h2>
+  
+  <div class="placeholder-icon">
+    <i class="fas fa-camera"></i>
+  </div>
+
+  <div class="camera-preview">
+    <i class="fas fa-sync-alt fa-spin"></i>
+    <p>Camera feed will appear here</p>
+  </div>
+
+  <div class="construction-message">
+    <h3><i class="fas fa-tools"></i> 🎥 Under Construction</h3>
+    <p>The live camera module is currently being set up. Soon you will be able to watch real‑time video from our ESP32‑CAM module installed in the forest monitoring area.</p>
+    <p><strong>Expected features:</strong><br>
+    • Live streaming of wildfire‑prone zones<br>
+    • Snapshot on high‑risk alerts<br>
+    • Night vision & motion detection</p>
+  </div>
+
+  <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+</div>
+
+<!-- Scroll to Top Button -->
+<button onclick="topFunction()" id="scrollTopBtn">&#8679;</button>
+
+<script>
+// Scroll to top functionality (consistent with other pages)
+var mybutton = document.getElementById("scrollTopBtn");
+window.onscroll = function() { scrollFunction(); };
+function scrollFunction() {
+  if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+    mybutton.style.display = "block";
+  } else {
+    mybutton.style.display = "none";
+  }
+}
+function topFunction() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+</script>
+
+<footer>&copy; 2026 Prometheus Fire Predictor. All rights reserved.</footer>
+
+</body>
+</html>

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prometheus | Live Data Analysis</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Main container styling - matching predict.html */
+    .analysis-card {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 40px;
+      background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(30, 58, 138, 0.15);
+      text-align: center;
+      border: 1px solid rgba(30, 58, 138, 0.1);
+    }
+
+    .analysis-card h2 {
+      color: #1e3a8a;
+      font-size: 42px;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Module buttons - same as predict.html */
+    .modules {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .modules button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(30, 58, 138, 0.3);
+      min-width: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .modules button:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(30, 58, 138, 0.4);
+    }
+
+    .modules button.active {
+      background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+      box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+    }
+
+    /* Graphs container - HIDDEN BY DEFAULT */
+    .graphs-container {
+      display: none; /* Hidden initially */
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      margin: 40px 0;
+    }
+
+    @media (max-width: 1024px) {
+      .graphs-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .graph-box {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 1px solid rgba(30, 58, 138, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .graph-box:hover {
+      transform: translateY(-5px);
+    }
+
+    .graph-box.full-width {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 1024px) {
+      .graph-box.full-width {
+        grid-column: span 1;
+      }
+    }
+
+    .graph-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+    }
+
+    .graph-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .graph-value {
+      font-size: 28px;
+      font-weight: 800;
+      padding: 8px 20px;
+      border-radius: 10px;
+      background: rgba(30, 58, 138, 0.1);
+      color: #1e3a8a;
+    }
+
+    .graph-canvas {
+      width: 100% !important;
+      height: 300px !important;
+    }
+
+    /* Current readings section - HIDDEN BY DEFAULT */
+    .current-readings {
+      display: none; /* Hidden initially */
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      padding: 30px;
+      border-radius: 18px;
+      margin: 40px 0;
+      border: 2px solid #90caf9;
+    }
+
+    .readings-title {
+      color: #1e3a8a;
+      font-size: 28px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .readings-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .readings-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .readings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .reading-card {
+      background: white;
+      padding: 25px 20px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      border-top: 5px solid;
+      transition: transform 0.3s ease;
+    }
+
+    .reading-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .reading-card:nth-child(1) { border-top-color: #e53935; }
+    .reading-card:nth-child(2) { border-top-color: #1e88e5; }
+    .reading-card:nth-child(3) { border-top-color: #43a047; }
+    .reading-card:nth-child(4) { border-top-color: #6d4c41; }
+
+    .reading-icon {
+      font-size: 36px;
+      margin-bottom: 15px;
+    }
+
+    .reading-card:nth-child(1) .reading-icon { color: #e53935; }
+    .reading-card:nth-child(2) .reading-icon { color: #1e88e5; }
+    .reading-card:nth-child(3) .reading-icon { color: #43a047; }
+    .reading-card:nth-child(4) .reading-icon { color: #6d4c41; }
+
+    .reading-value {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 10px 0;
+      display: block;
+    }
+
+    .reading-label {
+      font-size: 16px;
+      color: #666;
+      font-weight: 600;
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 60px;
+    }
+
+    .loading-spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #1e3a8a;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 25px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 18px;
+      color: #1e3a8a;
+      font-weight: 600;
+    }
+
+    /* Stats info - HIDDEN BY DEFAULT */
+    .stats-info {
+      display: none; /* Hidden initially */
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 40px 0;
+    }
+
+    @media (max-width: 768px) {
+      .stats-info {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: #1e3a8a;
+      margin: 15px 0;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      color: #666;
+    }
+
+    /* Refresh button - HIDDEN BY DEFAULT */
+    .refresh-btn {
+      display: none; /* Hidden initially */
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: white;
+      border: none;
+      padding: 15px 35px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 18px;
+      margin: 30px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(30, 58, 138, 0.3);
+    }
+
+    .refresh-btn:hover {
+      background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+    }
+
+    /* Last update - HIDDEN BY DEFAULT */
+    .last-update {
+      display: none; /* Hidden initially */
+      text-align: center;
+      color: #666;
+      font-size: 16px;
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    /* Data status */
+    .data-status {
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .status-online {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #81c784;
+    }
+    
+    .status-offline {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+    
+    .status-warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .channel-info {
+      background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      border: 1px solid #7986cb;
+    }
+
+    .time-range {
+      display: none; /* Hidden initially */
+      justify-content: center;
+      gap: 15px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+
+    .time-btn {
+      padding: 12px 25px;
+      border: 2px solid #1e3a8a;
+      background: white;
+      color: #1e3a8a;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .time-btn:hover, .time-btn.active {
+      background: #1e3a8a;
+      color: white;
+    }
+
+    /* Module info message */
+    .module-message {
+      display: none;
+      text-align: center;
+      padding: 60px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      margin: 30px 0;
+    }
+
+    .module-message i {
+      font-size: 80px;
+      color: #6c757d;
+      margin-bottom: 20px;
+    }
+
+    .module-message h3 {
+      color: #1e3a8a;
+      margin-bottom: 20px;
+    }
+
+    .module-message p {
+      color: #666;
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+
+    .switch-btn {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .switch-btn:hover {
+      background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+      transform: translateY(-3px);
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="site-title">Prometheus</div>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="analysis.html" style="color:#f97316;">Data Analysis</a>
+  <a href="predict.html">Prediction</a>
+  <a href="live.html">Live Cam</a>
+  <a href="about.html">About Us</a>
+</nav>
+
+<section class="analysis-card">
+  <h2><i class="fas fa-chart-line"></i> Live Data Analysis</h2>
+  
+  <div id="dataStatus" class="data-status status-warning">
+    <i class="fas fa-circle" style="color:#FF9800; font-size: 10px;"></i>
+    <span>Select a module to view data</span>
+  </div>
+
+  <div class="modules">
+    <button onclick="selectModule(1)"><i class="fas fa-microchip"></i> Module 1</button>
+    <button onclick="selectModule(2)"><i class="fas fa-wifi"></i> Module 2</button>
+    <button onclick="selectModule(3)"><i class="fas fa-satellite"></i> Module 3</button>
+    <button onclick="selectModule(4)"><i class="fas fa-sensor"></i> Module 4</button>
+    <button onclick="selectModule(5)"><i class="fas fa-robot"></i> Module 5</button>
+  </div>
+
+  <div id="moduleMessage" class="module-message">
+    <i class="fas fa-chart-bar"></i>
+    <h3>Select a Module to View Data</h3>
+    <p>Click on any module button above to view its sensor data and graphs. Only Module 1 has live data from ESP32.</p>
+    <button onclick="selectModule(1)" class="switch-btn">
+      <i class="fas fa-microchip"></i> View Module 1 Data
+    </button>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Fetching live data from ESP32...</div>
+  </div>
+
+  <div id="timeRange" class="time-range">
+    <button class="time-btn active" onclick="setTimeRange('1h')">Last Hour</button>
+    <button class="time-btn" onclick="setTimeRange('6h')">Last 6 Hours</button>
+    <button class="time-btn" onclick="setTimeRange('24h')">Last 24 Hours</button>
+  </div>
+
+  <div id="graphsContainer" class="graphs-container">
+    <div class="graph-box">
+      <div class="graph-header">
+        <div class="graph-title"><i class="fas fa-thermometer-half" style="color:#e53935"></i> Temperature</div>
+        <div class="graph-value" id="tempValue">-- °C</div>
+      </div>
+      <canvas id="tempChart" class="graph-canvas"></canvas>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-header">
+        <div class="graph-title"><i class="fas fa-tint" style="color:#1e88e5"></i> Humidity</div>
+        <div class="graph-value" id="humValue">-- %</div>
+      </div>
+      <canvas id="humChart" class="graph-canvas"></canvas>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-header">
+        <div class="graph-title"><i class="fas fa-seedling" style="color:#43a047"></i> Soil Moisture</div>
+        <div class="graph-value" id="soilValue">-- %</div>
+      </div>
+      <canvas id="soilChart" class="graph-canvas"></canvas>
+    </div>
+
+    <div class="graph-box">
+      <div class="graph-header">
+        <div class="graph-title"><i class="fas fa-smog" style="color:#6d4c41"></i> Smoke Level</div>
+        <div class="graph-value" id="smokeValue">-- PPM</div>
+      </div>
+      <canvas id="smokeChart" class="graph-canvas"></canvas>
+    </div>
+
+    <div class="graph-box full-width">
+      <div class="graph-header">
+        <div class="graph-title"><i class="fas fa-fire" style="color:#ff6f00"></i> Fire Risk Index</div>
+        <div class="graph-value" id="riskValue">-- %</div>
+      </div>
+      <canvas id="fireChart" class="graph-canvas"></canvas>
+    </div>
+  </div>
+
+  <div id="currentReadings" class="current-readings">
+    <div class="readings-title"><i class="fas fa-sensor"></i> Current Sensor Readings</div>
+    <div class="readings-grid">
+      <div class="reading-card">
+        <div class="reading-icon"><i class="fas fa-thermometer-half"></i></div>
+        <span class="reading-value" id="currentTemp">--°C</span>
+        <span class="reading-label">Temperature</span>
+      </div>
+      <div class="reading-card">
+        <div class="reading-icon"><i class="fas fa-tint"></i></div>
+        <span class="reading-value" id="currentHum">--%</span>
+        <span class="reading-label">Humidity</span>
+      </div>
+      <div class="reading-card">
+        <div class="reading-icon"><i class="fas fa-seedling"></i></div>
+        <span class="reading-value" id="currentSoil">--%</span>
+        <span class="reading-label">Soil Moisture</span>
+      </div>
+      <div class="reading-card">
+        <div class="reading-icon"><i class="fas fa-smog"></i></div>
+        <span class="reading-value" id="currentSmoke">-- PPM</span>
+        <span class="reading-label">Smoke Level</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="statsInfo" class="stats-info">
+    <div class="stat-card">
+      <i class="fas fa-arrow-up" style="color:#4CAF50; font-size: 24px;"></i>
+      <div class="stat-value" id="maxTemp">-- °C</div>
+      <div class="stat-label">Max Temperature</div>
+    </div>
+    <div class="stat-card">
+      <i class="fas fa-arrow-down" style="color:#F44336; font-size: 24px;"></i>
+      <div class="stat-value" id="minHum">-- %</div>
+      <div class="stat-label">Min Humidity</div>
+    </div>
+    <div class="stat-card">
+      <i class="fas fa-chart-bar" style="color:#1e3a8a; font-size: 24px;"></i>
+      <div class="stat-value" id="avgRisk">-- %</div>
+      <div class="stat-label">Avg Fire Risk</div>
+    </div>
+  </div>
+
+  <button id="refreshBtn" onclick="forceRefresh()" class="refresh-btn">
+    <i class="fas fa-sync-alt"></i> Refresh Data Now
+  </button>
+
+  <div id="lastUpdate" class="last-update">
+    <i class="fas fa-clock"></i> Last updated: <span id="lastUpdateTime">--:--:--</span> | 
+    Data points: <span id="dataPoints">0</span> | 
+    Channel: <span id="channelID">3255039</span> | 
+    Next update in <span id="countdown">30</span> seconds
+  </div>
+</section>
+
+<script>
+const THINGSPEAK_CHANNEL_ID = '3255039';
+const THINGSPEAK_READ_API_KEY = 'KHTXJ2C7RZJWA2PL';
+let currentTimeRange = '1h';
+let currentModule = null;
+let chartInstances = {};
+let lastData = {};
+let autoRefreshInterval;
+
+function initializeCharts() {
+  const chartConfigs = {
+    tempChart: { label: 'Temperature (°C)', color: '#e53935' },
+    humChart: { label: 'Humidity (%)', color: '#1e88e5' },
+    soilChart: { label: 'Soil Moisture (%)', color: '#43a047' },
+    smokeChart: { label: 'Smoke Level (PPM)', color: '#6d4c41' },
+    fireChart: { label: 'Fire Risk Index (%)', color: '#ff6f00' }
+  };
+
+  Object.keys(chartConfigs).forEach(id => {
+    const ctx = document.getElementById(id).getContext('2d');
+    const config = chartConfigs[id];
+    chartInstances[id] = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [{ label: config.label, data: [], borderColor: config.color, backgroundColor: config.color+'20', borderWidth:3, fill:true, tension:0.4, pointRadius:3, pointBackgroundColor:config.color, pointBorderColor:'#fff', pointBorderWidth:2 }]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:true, position:'top'}}, scales:{x:{grid:{color:'rgba(0,0,0,0.05)'}}, y:{beginAtZero:true, grid:{color:'rgba(0,0,0,0.05)'}}}}
+    });
+  });
+}
+
+function showModuleElements(show) {
+  ['timeRange','currentReadings','graphsContainer','statsInfo','refreshBtn','lastUpdate'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = show ? (id==='timeRange'?'flex':id==='statsInfo'?'grid':id==='refreshBtn'?'inline-flex':id==='lastUpdate'?'block':id==='graphsContainer'?'grid':'block') : 'none';
+  });
+  document.getElementById('moduleMessage').style.display = show?'none':'block';
+}
+
+function parseField(value, defaultValue=0){const num=parseFloat(value);return isNaN(num)?defaultValue:num;}
+
+async function fetchThingSpeakData() {
+  if(currentModule!==1) return;
+  showLoading(true);
+  updateStatus('Fetching data from ThingSpeak...', 'warning');
+  try {
+    let results = currentTimeRange==='1h'?60:currentTimeRange==='6h'?360:currentTimeRange==='24h'?144:168;
+    const url = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds.json?api_key=${THINGSPEAK_READ_API_KEY}&results=${results}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if(data.feeds && data.feeds.length>0){
+      const hasData = data.feeds.some(f=>parseField(f.field1)+parseField(f.field2)+parseField(f.field3)+parseField(f.field4)+parseField(f.field5)>0);
+      if(hasData){processRealData(data.feeds);updateStatus(`✅ Connected to ThingSpeak | ${data.feeds.length} data points`,'online');document.getElementById('dataPoints').textContent=data.feeds.length;updateLastUpdateTime();return true;}
+      else {updateStatus('⚠️ ThingSpeak channel has no sensor data. Check ESP32.','warning');return false;}
+    } else throw new Error('No data available from ThingSpeak');
+  } catch(e){console.error(e);updateStatus(`❌ ThingSpeak error: ${e.message}. Check channel ID and API key.`,'offline');return false;}
+  finally{showLoading(false);}
+}
+
+function processRealData(feeds){
+  feeds.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const timestamps=[],temperatures=[],humidities=[],soilMoistures=[],smokeLevels=[],fireRisks=[];
+  feeds.forEach((feed,index)=>{
+    const date=new Date(feed.created_at);
+    const timeLabel=date.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const temp=parseField(feed.field1);
+    const hum=parseField(feed.field2);
+    const soil=parseField(feed.field3);
+    const smoke=parseField(feed.field4);
+    const risk=parseField(feed.field5);
+    timestamps.push(timeLabel);temperatures.push(temp);humidities.push(hum);soilMoistures.push(soil);smokeLevels.push(smoke);fireRisks.push(risk);
+    if(index===feeds.length-1){lastData={temp,hum,soil,smoke,risk,lat:parseField(feed.field6,27.7172),lon:parseField(feed.field7,85.3240),alt:parseField(feed.field8,1400),timestamp:feed.created_at,entry_id:feed.entry_id};}
+  });
+  updateChartWithData('tempChart',timestamps,temperatures);
+  updateChartWithData('humChart',timestamps,humidities);
+  updateChartWithData('soilChart',timestamps,soilMoistures);
+  updateChartWithData('smokeChart',timestamps,smokeLevels);
+  updateChartWithData('fireChart',timestamps,fireRisks);
+  updateCurrentReadingsDisplay();
+  updateStatisticsDisplay(temperatures,humidities,fireRisks);
+}
+
+function updateChartWithData(chartId,labels,data){
+  const chart=chartInstances[chartId];if(!chart){console.error(`Chart ${chartId} not found!`);return;}
+  chart.data.labels=labels;chart.data.datasets[0].data=data;
+  const unit=chartId==='tempChart'?'°C':chartId==='humChart'||chartId==='soilChart'?'%':chartId==='smokeChart'?'PPM':'%';
+  const currentValue=data.length>0?data[data.length-1]:0;
+  document.getElementById(chartId.replace('Chart','Value')).textContent=currentValue>0?currentValue.toFixed(1)+unit:'-- '+unit;
+  chart.update('none');
+}
+
+function updateCurrentReadingsDisplay(){
+  document.getElementById('currentTemp').innerHTML=(lastData.temp>0?lastData.temp.toFixed(1):'--')+' °C';
+  document.getElementById('currentHum').innerHTML=(lastData.hum>0?lastData.hum.toFixed(1):'--')+' %';
+  document.getElementById('currentSoil').innerHTML=(lastData.soil>0?lastData.soil.toFixed(1):'--')+' %';
+  document.getElementById('currentSmoke').innerHTML=(lastData.smoke>0?lastData.smoke.toFixed(1):'--')+' PPM';
+  document.getElementById('riskValue').innerHTML=(lastData.risk>0?lastData.risk.toFixed(1):'--')+' %';
+}
+
+function updateStatisticsDisplay(temps,hums,risks){
+  const validTemps=temps.filter(t=>t>0);const validHums=hums.filter(h=>h>0);const validRisks=risks.filter(r=>r>0);
+  if(validTemps.length>0) document.getElementById('maxTemp').textContent=Math.max(...validTemps).toFixed(1)+' °C';
+  if(validHums.length>0) document.getElementById('minHum').textContent=Math.min(...validHums).toFixed(1)+' %';
+  if(validRisks.length>0){const avg=validRisks.reduce((a,b)=>a+b,0)/validRisks.length;document.getElementById('avgRisk').textContent=avg.toFixed(1)+' %';}
+}
+
+function showLoading(show){document.getElementById('loading').style.display=show?'block':'none';}
+function updateStatus(msg,type){const status=document.getElementById('dataStatus');const color=type==='online'?'#4CAF50':type==='warning'?'#FF9800':'#F44336';status.innerHTML=`<i class="fas fa-circle" style="color:${color}; font-size:10px;"></i> ${msg}`;status.className=`data-status status-${type}`;}
+function updateLastUpdateTime(){document.getElementById('lastUpdateTime').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function startCountdown(){let seconds=30;const countdown=document.getElementById('countdown');const interval=setInterval(()=>{seconds--;countdown.textContent=seconds;if(seconds<=0){clearInterval(interval);if(currentModule===1){fetchThingSpeakData();startCountdown();}}},1000);}
+
+function selectModule(module){
+  currentModule=module;
+  document.querySelectorAll('.modules button').forEach((btn,i)=>btn.classList.toggle('active',i===module-1));
+  if(module===1){showModuleElements(true);updateStatus('Loading Module 1 data...','warning');fetchThingSpeakData();startCountdown();clearInterval(autoRefreshInterval);autoRefreshInterval=setInterval(()=>{if(currentModule===1)fetchThingSpeakData();},30000);}
+  else{showModuleElements(false);updateStatus(`Module ${module} is under development`,'warning');clearInterval(autoRefreshInterval);autoRefreshInterval=null;}
+}
+
+function setTimeRange(range){currentTimeRange=range;document.querySelectorAll('.time-btn').forEach(btn=>btn.classList.remove('active'));document.querySelectorAll('.time-btn').forEach(btn=>{if(btn.textContent.includes(range.replace('h',' Hour').replace('d',' Day'))) btn.classList.add('active');});if(currentModule===1) fetchThingSpeakData();}
+function forceRefresh(){if(currentModule===1){fetchThingSpeakData();startCountdown();}}
+
+window.onload=function(){initializeCharts();showModuleElements(false);updateStatus('Select a module to start','warning');};
+</script>
+<footer>&copy; 2026 Prometheus Fire Predictor. All rights reserved.</footer>
+</body>
+</html>

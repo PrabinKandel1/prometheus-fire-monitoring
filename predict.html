@@ -1,0 +1,997 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prometheus | Live Fire Prediction</title>
+<link rel="stylesheet" href="css/style.css">
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.analysis-card {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 40px;
+  background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(30, 58, 138, 0.15);
+  text-align: center;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+.analysis-card h2 {
+  color: #1e3a8a;
+  font-size: 42px;
+  margin-bottom: 30px;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+.modules {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.modules button {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(30, 58, 138, 0.3);
+  min-width: 140px;
+}
+
+.modules button:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(30, 58, 138, 0.4);
+}
+
+.modules button.active {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+}
+
+#predictionResult {
+  margin: 35px 0;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.6;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+#map {
+  height: 450px;
+  width: 100%;
+  margin: 30px 0;
+  border-radius: 18px;
+  border: 3px solid #1e3a8a;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.data-display {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin: 30px 0;
+}
+
+@media (max-width: 1024px) {
+  .data-display {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .data-display {
+    grid-template-columns: 1fr;
+  }
+}
+
+.data-item {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  padding: 25px 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  text-align: center;
+  border-left: 6px solid;
+  transition: transform 0.3s ease;
+}
+
+.data-item:hover {
+  transform: translateY(-5px);
+}
+
+.data-item:nth-child(1) { border-left-color: #e53935; }
+.data-item:nth-child(2) { border-left-color: #1e88e5; }
+.data-item:nth-child(3) { border-left-color: #43a047; }
+.data-item:nth-child(4) { border-left-color: #6d4c41; }
+
+.data-item i {
+  font-size: 36px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.data-item:nth-child(1) i { color: #e53935; }
+.data-item:nth-child(2) i { color: #1e88e5; }
+.data-item:nth-child(3) i { color: #43a047; }
+.data-item:nth-child(4) i { color: #6d4c41; }
+
+.data-value {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 10px 0;
+  display: block;
+}
+
+.data-label {
+  font-size: 16px;
+  color: #666;
+  font-weight: 600;
+}
+
+.risk-level {
+  font-size: 32px;
+  padding: 25px;
+  border-radius: 15px;
+  margin: 25px 0;
+  font-weight: 800;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.risk-low { 
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  border: 3px solid #81C784;
+}
+
+.risk-medium { 
+  background: linear-gradient(135deg, #FF9800 0%, #EF6C00 100%);
+  color: white;
+  border: 3px solid #FFB74D;
+}
+
+.risk-high { 
+  background: linear-gradient(135deg, #F44336 0%, #C62828 100%);
+  color: white;
+  border: 3px solid #E57373;
+}
+
+.gps-coordinates {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  padding: 25px;
+  border-radius: 15px;
+  margin: 25px 0;
+  font-family: 'Courier New', monospace;
+  border: 2px solid #90caf9;
+  text-align: left;
+}
+
+.gps-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.gps-header h3 {
+  margin: 0;
+  color: #1e3a8a;
+}
+
+.gps-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .gps-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gps-item {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.refresh-btn {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  transform: translateY(-3px);
+}
+
+.loading {
+  display: none;
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #1e3a8a;
+}
+
+.loading-spinner {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1e3a8a;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.info-panel {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 20px;
+  border-radius: 15px;
+  margin: 25px 0;
+  border: 2px solid #f59e0b;
+  text-align: left;
+}
+
+.info-panel h4 {
+  color: #92400e;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wifi-info {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 20px;
+  border-radius: 15px;
+  margin: 25px 0;
+  border: 2px solid #0ea5e9;
+}
+
+.wifi-info h4 {
+  color: #0369a1;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.last-update {
+  text-align: right;
+  color: #666;
+  font-size: 14px;
+  margin-top: 15px;
+  font-style: italic;
+}
+
+.map-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.leaflet-control-layers {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.data-status {
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.status-online {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #81c784;
+}
+
+.status-offline {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.channel-info {
+  background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+  padding: 15px;
+  border-radius: 10px;
+  margin: 15px 0;
+  border: 1px solid #7986cb;
+}
+</style>
+</head>
+<body>
+
+<div class="site-title">Prometheus</div>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="analysis.html">Data Analysis</a>
+  <a href="predict.html" style="color:#f97316;">Prediction</a>
+  <a href="live.html">Live Cam</a>
+  <a href="about.html">About Us</a>
+</nav>
+
+<section class="analysis-card">
+  <h2><i class="fas fa-fire"></i> Live Fire Risk Prediction</h2>
+
+  <!-- Channel Info -->
+  <div class="channel-info">
+    <i class="fas fa-database"></i> 
+    <strong>Connected From ThingSpeak Channel </strong> | 
+    WiFi: Prabin_fpkr | ESP32 Module 1
+  </div>
+
+  <!-- Data Status -->
+  <div id="dataStatus" class="data-status status-online">
+    <i class="fas fa-circle" style="color:#4CAF50; font-size: 10px;"></i>
+    <span>Connected to ThingSpeak Channel 3255039</span>
+  </div>
+
+  <!-- Module selection -->
+  <div class="modules">
+    <button onclick="selectModule(1)" class="active">
+      <i class="fas fa-microchip"></i> Module 1
+    </button>
+    <button onclick="selectModule(2)">
+      <i class="fas fa-wifi"></i> Module 2
+    </button>
+    <button onclick="selectModule(3)">
+      <i class="fas fa-satellite"></i> Module 3
+    </button>
+    <button onclick="selectModule(4)">
+      <i class="fas fa-sensor"></i> Module 4
+    </button>
+    <button onclick="selectModule(5)">
+      <i class="fas fa-robot"></i> Module 5
+    </button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <p>Fetching live data from ESP32 sensors...</p>
+  </div>
+
+  <!-- Prediction Results -->
+  <div id="predictionResult"></div>
+  
+  <!-- Map Container -->
+  <div id="map"></div>
+  
+  <!-- Refresh Button -->
+  <button onclick="forceRefresh()" class="refresh-btn">
+    <i class="fas fa-sync-alt"></i> Refresh Data Now
+  </button>
+</section>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// ==================== CONFIGURATION ====================
+const THINGSPEAK_CHANNEL_ID = '3255039'; // Your channel ID
+const THINGSPEAK_READ_API_KEY = 'KHTXJ2C7RZJWA2PL'; // Your read API key
+const THINGSPEAK_WRITE_API_KEY = 'XPCKHVEN3AJTHR83'; // Your write API key
+const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds.json?api_key=${THINGSPEAK_READ_API_KEY}&results=1`;
+
+// Your WiFi Network (for display only)
+const WIFI_SSID = 'barall_fpkhr';
+
+// Default GPS Location (will be overwritten by actual GPS data)
+let MODULE1_GPS = { 
+  lat: 27.7172, 
+  lon: 85.3240, 
+  location: "Forest Monitoring Station",
+  elevation: "1,400m",
+  area: "Protected Forest Zone",
+  installation_date: "2024-03-15"
+};
+
+let currentModule = 1;
+let map, marker, monitoringArea;
+let lastUpdateTime = null;
+let autoRefreshInterval = null;
+
+// ==================== FETCH LIVE DATA FROM ESP32 ====================
+async function fetchThingSpeakData() {
+  showLoading(true);
+  updateStatus('Fetching data from ThingSpeak...', 'warning');
+  
+  try {
+    const response = await fetch(THINGSPEAK_URL);
+    const data = await response.json();
+    
+    console.log("ThingSpeak Response:", data);
+    
+    if (data.feeds && data.feeds.length > 0) {
+      const latest = data.feeds[0];
+      lastUpdateTime = latest.created_at;
+      
+      // Update GPS coordinates from ThingSpeak data
+      const lat = parseFloat(latest.field6);
+      const lon = parseFloat(latest.field7);
+      const alt = parseFloat(latest.field8);
+      
+      if (!isNaN(lat) && !isNaN(lon)) {
+        MODULE1_GPS.lat = lat;
+        MODULE1_GPS.lon = lon;
+        if (!isNaN(alt)) MODULE1_GPS.elevation = alt.toFixed(1) + "m";
+      }
+      
+      // ESP32 sends: field1=temp, field2=humidity, field3=soil, field4=smoke, field5=risk, field6=lat, field7=lon, field8=alt
+      const sensorData = {
+        temp: parseFloat(latest.field1) || 0,
+        hum: parseFloat(latest.field2) || 0,
+        soil: parseFloat(latest.field3) || 0,
+        smoke: parseFloat(latest.field4) || 0,
+        risk: parseFloat(latest.field5) || 0,
+        lat: lat,
+        lon: lon,
+        alt: alt,
+        timestamp: latest.created_at,
+        entry_id: latest.entry_id,
+        field1: latest.field1,
+        field2: latest.field2,
+        field3: latest.field3,
+        field4: latest.field4,
+        field5: latest.field5,
+        field6: latest.field6,
+        field7: latest.field7,
+        field8: latest.field8
+      };
+      
+      updateStatus(`✅ Connected to ThingSpeak | Entry ID: ${sensorData.entry_id}`, 'online');
+      updatePredictionDisplay(sensorData);
+      updateMap(sensorData);
+      return sensorData;
+    } else {
+      throw new Error("No data available from ThingSpeak");
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    updateStatus(`❌ ThingSpeak error: ${error.message}`, 'offline');
+    
+    // Return simulated data for testing
+    const simulatedTemp = 25 + Math.random() * 10;
+    const simulatedHum = 40 + Math.random() * 30;
+    const simulatedSoil = 30 + Math.random() * 40;
+    const simulatedSmoke = Math.random() * 25;
+    const simulatedRisk = calculateFireRisk(simulatedTemp, simulatedHum, simulatedSoil, simulatedSmoke);
+    
+    const simulatedData = {
+      temp: simulatedTemp,
+      hum: simulatedHum,
+      soil: simulatedSoil,
+      smoke: simulatedSmoke,
+      risk: simulatedRisk,
+      lat: MODULE1_GPS.lat,
+      lon: MODULE1_GPS.lon,
+      alt: 1400,
+      timestamp: new Date().toISOString(),
+      entry_id: "sim_" + Date.now(),
+      field1: simulatedTemp.toFixed(2),
+      field2: simulatedHum.toFixed(2),
+      field3: simulatedSoil.toFixed(2),
+      field4: simulatedSmoke.toFixed(2),
+      field5: simulatedRisk.toFixed(2),
+      field6: MODULE1_GPS.lat.toFixed(6),
+      field7: MODULE1_GPS.lon.toFixed(6),
+      field8: "1400"
+    };
+    
+    updatePredictionDisplay(simulatedData);
+    updateMap(simulatedData);
+    return simulatedData;
+  } finally {
+    showLoading(false);
+  }
+}
+
+// ==================== FIRE RISK CALCULATION ====================
+function calculateFireRisk(temp, hum, soil, smoke) {
+  let risk = 0;
+  
+  // Temperature factor
+  if (temp > 35) risk += 40;
+  else if (temp > 30) risk += 30;
+  else if (temp > 25) risk += 20;
+  else if (temp > 20) risk += 10;
+  
+  // Humidity factor (inverse)
+  if (hum < 30) risk += 30;
+  else if (hum < 50) risk += 20;
+  else if (hum < 70) risk += 10;
+  
+  // Soil moisture factor (inverse)
+  if (soil < 20) risk += 30;
+  else if (soil < 40) risk += 20;
+  else if (soil < 60) risk += 10;
+  
+  // Smoke factor
+  if (smoke > 100) risk += 30;
+  else if (smoke > 50) risk += 20;
+  else if (smoke > 20) risk += 10;
+  
+  // Cap at 100%
+  return Math.min(Math.max(risk, 0), 100);
+}
+
+// ==================== UPDATE PREDICTION DISPLAY ====================
+function updatePredictionDisplay(sensorData) {
+  const risk = sensorData.risk > 0 ? sensorData.risk : 
+               calculateFireRisk(sensorData.temp, sensorData.hum, sensorData.soil, sensorData.smoke);
+  
+  // Determine risk level
+  let riskClass = 'risk-low';
+  let riskText = 'LOW RISK';
+  let riskIcon = '<i class="fas fa-check-circle"></i>';
+  
+  if (risk > 40 && risk <= 70) {
+    riskClass = 'risk-medium';
+    riskText = 'MEDIUM RISK';
+    riskIcon = '<i class="fas fa-exclamation-triangle"></i>';
+  } else if (risk > 70) {
+    riskClass = 'risk-high';
+    riskText = 'HIGH RISK';
+    riskIcon = '<i class="fas fa-fire"></i>';
+  }
+  
+  const resultDiv = document.getElementById("predictionResult");
+  resultDiv.innerHTML = `
+    <div class="${riskClass} risk-level">
+      ${riskIcon} ${riskText} - ${risk.toFixed(1)}%
+    </div>
+    
+    <div class="gps-coordinates">
+      <div class="gps-header">
+        <h3><i class="fas fa-map-marker-alt"></i> ESP32 Module 1 Location</h3>
+        <span class="status-badge"><i class="fas fa-circle" style="font-size: 10px; color: #4CAF50;"></i> ACTIVE</span>
+      </div>
+      <div class="gps-details">
+        <div class="gps-item">
+          <strong><i class="fas fa-location-dot"></i> Coordinates</strong><br>
+          Lat: ${sensorData.lat.toFixed(6)}<br>
+          Lon: ${sensorData.lon.toFixed(6)}
+        </div>
+        <div class="gps-item">
+          <strong><i class="fas fa-mountain"></i> Location Info</strong><br>
+          ${MODULE1_GPS.location}<br>
+          Altitude: ${sensorData.alt ? sensorData.alt.toFixed(1) + 'm' : MODULE1_GPS.elevation}
+        </div>
+        <div class="gps-item">
+          <strong><i class="fas fa-calendar"></i> Channel Info</strong><br>
+          ID: ${THINGSPEAK_CHANNEL_ID}<br>
+          Entry: ${sensorData.entry_id}
+        </div>
+      </div>
+    </div>
+    
+    <div class="data-display">
+      <div class="data-item">
+        <i class="fas fa-thermometer-half"></i>
+        <span class="data-value">${sensorData.temp.toFixed(1)}°C</span>
+        <span class="data-label">Temperature</span>
+      </div>
+      <div class="data-item">
+        <i class="fas fa-tint"></i>
+        <span class="data-value">${sensorData.hum.toFixed(1)}%</span>
+        <span class="data-label">Humidity</span>
+      </div>
+      <div class="data-item">
+        <i class="fas fa-seedling"></i>
+        <span class="data-value">${sensorData.soil.toFixed(1)}%</span>
+        <span class="data-label">Soil Moisture</span>
+      </div>
+      <div class="data-item">
+        <i class="fas fa-smog"></i>
+        <span class="data-value">${sensorData.smoke.toFixed(1)} PPM</span>
+        <span class="data-label">Smoke Level</span>
+      </div>
+    </div>
+    
+    <div class="info-panel">
+      <h4><i class="fas fa-info-circle"></i> Fire Risk Analysis</h4>
+      <p>
+        Based on current sensor readings, the fire risk is ${riskText.toLowerCase()}. 
+        ${risk > 70 ? '⚠️ <strong>Warning:</strong> High fire risk detected! Conditions are favorable for wildfire ignition.' : 
+          risk > 40 ? '⚠️ <strong>Caution:</strong> Moderate fire risk. Monitor conditions closely.' : 
+          '✅ <strong>Good:</strong> Low fire risk. Conditions are currently safe.'}
+      </p>
+    </div>
+    
+    <div class="wifi-info">
+      <h4><i class="fas fa-wifi"></i> ESP32 Connection Status</h4>
+      <p>
+        <strong>WiFi Network:</strong> ${WIFI_SSID}<br>
+        <strong>ThingSpeak Channel:</strong> ${THINGSPEAK_CHANNEL_ID}<br>
+        <strong>Data Entry ID:</strong> ${sensorData.entry_id}<br>
+        <strong>Last Update:</strong> ${new Date(sensorData.timestamp).toLocaleTimeString()}
+      </p>
+    </div>
+    
+    <div class="last-update">
+      <i class="fas fa-clock"></i> Last updated: ${new Date(sensorData.timestamp).toLocaleTimeString()} | 
+      Next auto-refresh in <span id="countdown">30</span> seconds
+    </div>
+  `;
+  
+  startCountdown();
+}
+
+// ==================== UPDATE MAP ====================
+function updateMap(sensorData) {
+  const mapDiv = document.getElementById("map");
+  mapDiv.style.display = "block";
+  
+  const risk = sensorData.risk > 0 ? sensorData.risk : 
+               calculateFireRisk(sensorData.temp, sensorData.hum, sensorData.soil, sensorData.smoke);
+  
+  if (!map) {
+    initializeMap(sensorData, risk);
+  } else {
+    updateMapData(sensorData, risk);
+  }
+}
+
+function initializeMap(sensorData, risk) {
+  map = L.map('map').setView([sensorData.lat, sensorData.lon], 16);
+  
+  // Street Map Layer
+  const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(map);
+  
+  // Satellite Layer
+  const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri',
+    maxZoom: 19
+  });
+  
+  // Add layer control
+  const baseLayers = {
+    "Street Map": streetLayer,
+    "Satellite View": satelliteLayer
+  };
+  L.control.layers(baseLayers).addTo(map);
+  
+  // Create custom icon based on risk
+  const iconColor = getRiskColor(risk);
+  const fireIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: `
+      <div style="
+        background: ${iconColor};
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        border: 4px solid white;
+        box-shadow: 0 0 15px ${iconColor};
+        animation: pulse 2s infinite;
+      ">
+        <i class="fas fa-fire"></i>
+      </div>
+      <style>
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 ${iconColor}99; }
+          70% { box-shadow: 0 0 0 10px ${iconColor}00; }
+          100% { box-shadow: 0 0 0 0 ${iconColor}00; }
+        }
+      </style>
+    `,
+    iconSize: [50, 50],
+    iconAnchor: [25, 25],
+    popupAnchor: [0, -25]
+  });
+  
+  // Add marker
+  marker = L.marker([sensorData.lat, sensorData.lon], { icon: fireIcon }).addTo(map);
+  
+  // Add monitoring area circle (500m radius)
+  monitoringArea = L.circle([sensorData.lat, sensorData.lon], {
+    color: iconColor,
+    fillColor: iconColor,
+    fillOpacity: 0.15,
+    radius: 500
+  }).addTo(map);
+  
+  // Add scale control
+  L.control.scale().addTo(map);
+  
+  updatePopupContent(sensorData, risk);
+}
+
+function updateMapData(sensorData, risk) {
+  const iconColor = getRiskColor(risk);
+  
+  // Update map view
+  map.setView([sensorData.lat, sensorData.lon], 16);
+  
+  // Update marker position
+  marker.setLatLng([sensorData.lat, sensorData.lon]);
+  
+  // Update monitoring area
+  if (monitoringArea) {
+    monitoringArea.setLatLng([sensorData.lat, sensorData.lon]);
+    monitoringArea.setStyle({
+      color: iconColor,
+      fillColor: iconColor
+    });
+  }
+  
+  // Update popup content
+  updatePopupContent(sensorData, risk);
+}
+
+function updatePopupContent(sensorData, risk) {
+  const popupContent = `
+    <div style="min-width: 300px; max-width: 400px;">
+      <div style="
+        background: ${getRiskColor(risk)};
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        margin: -10px -10px 10px -10px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+      ">
+        <i class="fas fa-fire"></i> ESP32 Fire Monitoring Station
+      </div>
+      
+      <div style="padding: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+          <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 12px; color: #666;">🌡 Temperature</div>
+            <div style="font-size: 20px; font-weight: bold; color: #e53935;">${sensorData.temp.toFixed(1)}°C</div>
+          </div>
+          <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 12px; color: #666;">💧 Humidity</div>
+            <div style="font-size: 20px; font-weight: bold; color: #1e88e5;">${sensorData.hum.toFixed(1)}%</div>
+          </div>
+          <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 12px; color: #666;">🌱 Soil Moisture</div>
+            <div style="font-size: 20px; font-weight: bold; color: #43a047;">${sensorData.soil.toFixed(1)}%</div>
+          </div>
+          <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 12px; color: #666;">💨 Smoke Level</div>
+            <div style="font-size: 20px; font-weight: bold; color: #6d4c41;">${sensorData.smoke.toFixed(1)} PPM</div>
+          </div>
+        </div>
+        
+        <div style="
+          background: ${getRiskColor(risk)}15;
+          border-left: 4px solid ${getRiskColor(risk)};
+          padding: 10px;
+          border-radius: 5px;
+          margin: 10px 0;
+        ">
+          <div style="font-size: 12px; color: #666;">🔥 Fire Risk Index</div>
+          <div style="font-size: 24px; font-weight: bold; color: ${getRiskColor(risk)};">${sensorData.risk.toFixed(1)}%</div>
+          <div style="font-size: 12px; color: #666;">
+            ${sensorData.risk > 70 ? 'HIGH RISK - Immediate attention required' : 
+              sensorData.risk > 40 ? 'MEDIUM RISK - Monitor conditions' : 
+              'LOW RISK - Conditions normal'}
+          </div>
+        </div>
+        
+        <hr style="margin: 15px 0;">
+        
+        <div style="font-size: 12px; color: #666;">
+          <div><i class="fas fa-map-marker-alt"></i> ${MODULE1_GPS.location}</div>
+          <div><i class="fas fa-location-dot"></i> ${sensorData.lat.toFixed(6)}, ${sensorData.lon.toFixed(6)}</div>
+          <div><i class="fas fa-mountain"></i> Altitude: ${sensorData.alt ? sensorData.alt.toFixed(1) + 'm' : 'N/A'}</div>
+          <div><i class="fas fa-clock"></i> ${new Date(sensorData.timestamp).toLocaleTimeString()}</div>
+          <div><i class="fas fa-database"></i> Entry ID: ${sensorData.entry_id}</div>
+          <div><i class="fas fa-wifi"></i> Channel: ${THINGSPEAK_CHANNEL_ID}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  if (marker) {
+    marker.bindPopup(popupContent).openPopup();
+  }
+}
+
+function getRiskColor(risk) {
+  if (risk > 70) return '#F44336'; // Red
+  if (risk > 40) return '#FF9800'; // Orange
+  return '#4CAF50'; // Green
+}
+
+// ==================== MODULE SELECTION ====================
+function selectModule(module) {
+  currentModule = module;
+  document.querySelectorAll(".modules button").forEach(btn => btn.classList.remove("active"));
+  document.querySelectorAll(".modules button")[module - 1].classList.add("active");
+  
+  // Only Module 1 has real data for now
+  if (module === 1) {
+    fetchThingSpeakData();
+  } else {
+    showOtherModuleMessage(module);
+  }
+}
+
+function showOtherModuleMessage(module) {
+  document.getElementById("predictionResult").innerHTML = `
+    <div style="padding: 40px; text-align: center; background: #f8f9fa; border-radius: 15px;">
+      <div style="font-size: 80px; color: #6c757d; margin-bottom: 20px;">
+        <i class="fas fa-tools"></i>
+      </div>
+      <h3 style="color: #1e3a8a; margin-bottom: 20px;">Module ${module} - Under Development</h3>
+      <p style="color: #666; font-size: 18px; max-width: 600px; margin: 20px auto;">
+        This module is currently in development phase. Only <strong>Module 1</strong> is active with live ESP32 sensor data.
+      </p>
+      <button onclick="selectModule(1)" style="
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      ">
+        <i class="fas fa-arrow-left"></i> Switch to Module 1
+      </button>
+    </div>
+  `;
+  document.getElementById("map").style.display = "none";
+  updateStatus('Module 1 only active', 'warning');
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+function showLoading(show) {
+  document.getElementById("loading").style.display = show ? "block" : "none";
+  document.getElementById("predictionResult").style.display = show ? "none" : "block";
+}
+
+function updateStatus(message, type) {
+  const statusDiv = document.getElementById("dataStatus");
+  statusDiv.innerHTML = `<i class="fas fa-circle" style="color:${type === 'online' ? '#4CAF50' : type === 'warning' ? '#FF9800' : '#F44336'}; font-size: 10px;"></i> ${message}`;
+  statusDiv.className = `data-status status-${type}`;
+}
+
+function forceRefresh() {
+  if (currentModule === 1) {
+    fetchThingSpeakData();
+  }
+}
+
+function startCountdown() {
+  let seconds = 30;
+  const countdownElement = document.getElementById("countdown");
+  
+  if (countdownElement) {
+    clearInterval(window.countdownInterval);
+    
+    window.countdownInterval = setInterval(() => {
+      seconds--;
+      countdownElement.textContent = seconds;
+      
+      if (seconds <= 0) {
+        clearInterval(window.countdownInterval);
+        if (currentModule === 1) {
+          fetchThingSpeakData();
+        }
+      }
+    }, 1000);
+  }
+}
+
+// ==================== INITIALIZATION ====================
+window.onload = function() {
+  selectModule(1);
+  
+  // Auto-refresh every 30 seconds
+  autoRefreshInterval = setInterval(() => {
+    if (currentModule === 1) {
+      fetchThingSpeakData();
+    }
+  }, 30000);
+};
+
+// Clean up interval on page unload
+window.onbeforeunload = function() {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+  }
+  if (window.countdownInterval) {
+    clearInterval(window.countdownInterval);
+  }
+};
+</script>
+
+<!-- Scroll to Top Button -->
+<button onclick="topFunction()" id="scrollTopBtn">&#8679;</button>
+<script>
+var mybutton = document.getElementById("scrollTopBtn");
+window.onscroll = function() { scrollFunction() };
+function scrollFunction() {
+  if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+    mybutton.style.display = "block";
+  } else {
+    mybutton.style.display = "none";
+  }
+}
+function topFunction() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+</script>
+
+<footer>&copy; 2026 Prometheus Fire Predictor. All rights reserved.</footer>
+
+</body>
+</html>

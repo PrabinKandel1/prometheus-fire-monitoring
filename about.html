@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prometheus | About Us & Contact</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+/* =========================================================
+   ABOUT PAGE ONLY
+   Uses the existing Prometheus theme
+   ========================================================= */
+
+.about-intro {
+  text-align: center;
+  max-width: 850px;
+  margin: 0 auto 40px;
+}
+
+.about-intro .about-badge {
+  display: inline-block;
+  background: #BEF4FA;
+  color: #1e3a8a;
+  padding: 7px 18px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+.about-intro h1 {
+  color: #1e3a8a;
+  font-size: 42px;
+  margin-bottom: 15px;
+}
+
+.about-intro p {
+  color: #555;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* ABOUT MEMBER */
+.about-members {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.about-member {
+  width: 280px;
+  padding: 25px 20px;
+  background: #fafafa;
+  border-radius: 18px;
+  text-align: center;
+  border: 1px solid #eeeeee;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  transition: 0.3s ease;
+}
+
+.about-member:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.about-member img {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #1e3a8a;
+  margin-bottom: 15px;
+  transition: 0.3s ease;
+}
+
+.about-member:hover img {
+  transform: scale(1.05);
+  border-color: #f97316;
+}
+
+.about-member h3 {
+  color: #1e3a8a;
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+
+.about-member .role {
+  color: #f97316;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.about-member p {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* INFO CARDS */
+.about-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  margin-top: 40px;
+}
+
+.info-card {
+  background: #fafafa;
+  padding: 28px 22px;
+  border-radius: 15px;
+  text-align: center;
+  border: 1px solid #eeeeee;
+  transition: 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.09);
+}
+
+.info-icon {
+  width: 55px;
+  height: 55px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  background: #BEF4FA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+}
+
+.info-card h3 {
+  color: #1e3a8a;
+  margin-bottom: 8px;
+}
+
+.info-card p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* MISSION */
+.mission-box {
+  max-width: 850px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 30px;
+  background: linear-gradient(
+    135deg,
+    rgba(190,244,250,0.55),
+    rgba(255,255,255,0.95)
+  );
+  border-left: 5px solid #f97316;
+  border-radius: 12px;
+}
+
+.mission-box h3 {
+  color: #1e3a8a;
+  font-size: 25px;
+  margin-bottom: 12px;
+}
+
+.mission-box p {
+  color: #555;
+  line-height: 1.8;
+}
+
+/* CONTACT INTRO */
+.contact-intro {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 30px;
+}
+
+.contact-intro p {
+  color: #666;
+}
+
+/* CONTACT FORM */
+.contact-card {
+  max-width: 600px;
+  margin: 35px auto 0;
+}
+
+.contact-card input,
+.contact-card textarea {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.contact-card input:focus,
+.contact-card textarea:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.08);
+}
+
+.contact-card textarea {
+  resize: vertical;
+  min-height: 130px;
+}
+
+.contact-card button {
+  background: #1e3a8a;
+  color: white;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.contact-card button:hover {
+  background: #f97316;
+  transform: translateY(-3px);
+}
+
+/* SMALL CONTACT NOTE */
+.contact-note {
+  text-align: center;
+  margin-top: 20px;
+  color: #777;
+  font-size: 13px;
+}
+
+/* RESPONSIVE - ABOUT PAGE ONLY */
+@media (max-width: 800px) {
+  .about-info {
+    grid-template-columns: 1fr;
+  }
+
+  .about-intro h1 {
+    font-size: 34px;
+  }
+
+  .about-member {
+    width: 280px;
+  }
+}
+
+@media (max-width: 500px) {
+  .about-intro h1 {
+    font-size: 28px;
+  }
+
+  .about-intro p {
+    font-size: 15px;
+  }
+
+  .about-member {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+</style>
+
+<!-- EmailJS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+(function() {
+  emailjs.init("31XMK4CNmoe9w-OXY");
+})();
+</script>
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     SITE TITLE
+     ===================================================== -->
+
+<div class="site-title">Prometheus</div>
+
+
+<!-- =====================================================
+     NAVIGATION
+     ===================================================== -->
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="analysis.html">Data Analysis</a>
+  <a href="predict.html">Prediction</a>
+  <a href="live.html">Live Cam</a>
+  <a href="about.html" class="active">About Us</a>
+</nav>
+
+
+<!-- =====================================================
+     ABOUT US
+     ===================================================== -->
+
+<section class="section">
+
+  <div class="about-intro">
+
+    <span class="about-badge">
+      🔥 ABOUT PROMETHEUS
+    </span>
+
+    <h1>Protecting Tomorrow with Technology</h1>
+
+    <p>
+      Prometheus is a smart fire prediction and monitoring project
+      designed to use technology, sensors, data analysis and intelligent
+      prediction to help identify potential fire risks before they become
+      serious threats.
+    </p>
+
+  </div>
+
+
+  <!-- =================================================
+       TEAM
+       ================================================= -->
+
+  <h2>👨‍💻 Our Team</h2>
+
+  <div class="about-members">
+
+    <div class="about-member">
+
+      <img src="img/1.png" alt="Prabin Kandel">
+
+      <h3>Prabin Kandel</h3>
+
+      <div class="role">
+        Frontend & Research Lead
+      </div>
+
+      <p>
+        Responsible for the website interface, research, system design
+        and development of the Prometheus project.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     WHAT IS PROMETHEUS
+     ===================================================== -->
+
+<section class="section">
+
+  <h2>🚀 What is Prometheus?</h2>
+
+  <div class="about-intro">
+
+    <p>
+      Prometheus is a technology-based fire risk prediction and
+      monitoring system. It combines environmental sensor data,
+      real-time monitoring, data visualization and prediction
+      technologies to provide useful information about possible
+      fire risks.
+    </p>
+
+  </div>
+
+
+  <div class="about-info">
+
+    <div class="info-card">
+
+      <div class="info-icon">🌡️</div>
+
+      <h3>Smart Monitoring</h3>
+
+      <p>
+        Monitors important environmental conditions such as
+        temperature, humidity, smoke and soil-related data.
+      </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="info-icon">📊</div>
+
+      <h3>Data Analysis</h3>
+
+      <p>
+        Presents collected information through clear graphs
+        and visual data to make monitoring easier.
+      </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+      <div class="info-icon">🔥</div>
+
+      <h3>Fire Prediction</h3>
+
+      <p>
+        Uses available sensor information to help identify
+        conditions associated with potential fire risk.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     MISSION
+     ===================================================== -->
+
+<section class="section">
+
+  <h2>🎯 Our Mission</h2>
+
+  <div class="mission-box">
+
+    <h3>Technology for a Safer Future</h3>
+
+    <p>
+      Our mission is to explore how modern technology can be used
+      to improve fire awareness, monitoring and early risk detection.
+      Prometheus aims to turn environmental data into meaningful
+      information that can support faster awareness and better
+      decision-making.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     CONTACT US
+     ===================================================== -->
+
+<section class="section" id="contact">
+
+  <h2>📧 Contact Us</h2>
+
+  <div class="contact-intro">
+
+    <p>
+      Have a question, suggestion or feedback about Prometheus?
+      Send us a message using the form below.
+    </p>
+
+  </div>
+
+
+  <form class="contact-card" id="contact-form">
+
+    <input
+      type="text"
+      name="name"
+      placeholder="Your Name"
+      required
+    >
+
+    <input
+      type="email"
+      name="email"
+      placeholder="Your Email"
+      required
+    >
+
+    <textarea
+      name="message"
+      rows="5"
+      placeholder="Your Message"
+      required
+    ></textarea>
+
+    <button type="submit">
+      Send Message
+    </button>
+
+  </form>
+
+  <div class="contact-note">
+    Your message will be sent securely through our contact system.
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     SCROLL TO TOP
+     ===================================================== -->
+
+<button onclick="topFunction()" id="scrollTopBtn">
+  &#8679;
+</button>
+
+
+<script>
+
+var mybutton = document.getElementById("scrollTopBtn");
+
+window.onscroll = function() {
+  scrollFunction();
+};
+
+function scrollFunction() {
+
+  if (
+    document.body.scrollTop > 300 ||
+    document.documentElement.scrollTop > 300
+  ) {
+
+    mybutton.style.display = "block";
+
+  } else {
+
+    mybutton.style.display = "none";
+
+  }
+
+}
+
+function topFunction() {
+
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+
+}
+
+</script>
+
+
+<!-- =====================================================
+     EMAILJS
+     ===================================================== -->
+
+<script>
+
+document
+  .getElementById("contact-form")
+  .addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const button = this.querySelector("button");
+
+    button.disabled = true;
+    button.textContent = "Sending...";
+
+    emailjs.sendForm(
+      "service_pas",
+      "template_dxa0xrn",
+      this
+    )
+
+    .then(function() {
+
+      alert("✅ Message sent successfully!");
+
+      document
+        .getElementById("contact-form")
+        .reset();
+
+      button.disabled = false;
+      button.textContent = "Send Message";
+
+    })
+
+    .catch(function(error) {
+
+      alert("❌ Failed to send message. Please try again.");
+
+      console.error(
+        "EmailJS Error:",
+        error
+      );
+
+      button.disabled = false;
+      button.textContent = "Send Message";
+
+    });
+
+});
+
+</script>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer>
+  &copy; 2026 Prometheus Fire Predictor. All rights reserved.
+</footer>
+
+</body>
+</html>
+```
